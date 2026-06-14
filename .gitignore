@@ -1,0 +1,38 @@
+# Build and artifacts
+build*/
+Build/
+out/
+Out/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.elf
+
+# Debug and intermediate files
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# IDEs
+.vs/
+*.user
+*.suo
+*.sln
+*.vcxproj
+*.filters
+.idea/
+cmake-build-*/
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Logs
+*.log
+*.tmp
