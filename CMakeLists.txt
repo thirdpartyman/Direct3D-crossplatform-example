@@ -1,35 +1,38 @@
 cmake_minimum_required(VERSION 3.24)
-project(SDL3_D3D9_DXVK_Example C)
+project(SDL3_D3D9_DXVK_Example CXX)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(WIN32)
     if(MSVC)
         add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")       
     else()
-        string(APPEND CMAKE_EXE_LINKER_FLAGS " -static-libgcc")
-        string(APPEND CMAKE_SHARED_LINKER_FLAGS " -static-libgcc")
+        string(APPEND CMAKE_EXE_LINKER_FLAGS " -static-libgcc -static-libstdc++")
+        string(APPEND CMAKE_SHARED_LINKER_FLAGS " -static-libgcc -static-libstdc++")
     endif()
 endif()
 
 include(FetchContent)
 
-find_package(SDL3 QUIET)
-if(SDL3_FOUND)
+set(FETCHCONTENT_QUIET OFF CACHE BOOL "" FORCE)
+set(SDL_TESTS OFF CACHE BOOL "" FORCE)
+set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(SDL3
+    GIT_REPOSITORY    https://github.com/libsdl-org/SDL
+    GIT_TAG           release-3.2.0
+    GIT_SHALLOW       TRUE
+    GIT_PROGRESS      TRUE
+    FIND_PACKAGE_ARGS QUIET
+)
+
+FetchContent_MakeAvailable(SDL3)
+
+if(TARGET SDL3::SDL3)
     set(SDL3_TARGET SDL3::SDL3)
 else()
-    FetchContent_Declare(
-        SDL3
-        GIT_REPOSITORY    https://github.com/libsdl-org/SDL
-        GIT_TAG           release-3.2.0
-        GIT_SHALLOW       TRUE
-        GIT_PROGRESS TRUE
-    )
-    set(SDL_TESTS OFF CACHE BOOL "" FORCE)
-    set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(SDL3)
     set(SDL3_TARGET SDL3-shared)
 endif()
 
@@ -41,14 +44,14 @@ else()
     find_library(DXVK_D3D9_LIB NAMES dxvk_d3d9 dxvk d3d9)
 
     if(NOT DXVK_D3D9_LIB OR NOT DXVK_INCLUDE_DIR)
-        message(FATAL_ERROR "DXVK Native headers or libraries not found! Please install libdxvk via system package manager.")
+        message(FATAL_ERROR "DXVK Native headers or libraries not found!")
     endif()
 
     set(GRAPHICS_LIBRARIES ${DXVK_D3D9_LIB})
     set(GRAPHICS_INCLUDE_DIRS ${DXVK_INCLUDE_DIR})
 endif()
 
-add_executable(sdl3_d3d9_dxvk_example main.c)
+add_executable(sdl3_d3d9_dxvk_example main.cpp)
 
 if(GRAPHICS_INCLUDE_DIRS)
     target_include_directories(sdl3_d3d9_dxvk_example PRIVATE ${GRAPHICS_INCLUDE_DIRS})
@@ -61,8 +64,11 @@ target_link_libraries(sdl3_d3d9_dxvk_example PRIVATE
 
 set_target_properties(sdl3_d3d9_dxvk_example PROPERTIES WIN32_EXECUTABLE TRUE)
 
-add_custom_command(TARGET sdl3_d3d9_dxvk_example POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	$<TARGET_FILE:${SDL3_TARGET}>
-	$<TARGET_FILE_DIR:sdl3_d3d9_dxvk_example>
-)
+if(TARGET ${SDL3_TARGET})
+    add_custom_command(TARGET sdl3_d3d9_dxvk_example POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:${SDL3_TARGET}>
+        $<TARGET_FILE_DIR:sdl3_d3d9_dxvk_example>
+    )
+endif()
+
