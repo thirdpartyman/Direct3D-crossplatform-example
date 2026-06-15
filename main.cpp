@@ -119,12 +119,27 @@ void ShutdownApp() {
     SDL_Quit();
 }
 
+HWND GetNativeWindowHandle(SDL_Window* sdl_window) {
+    if (!sdl_window) return nullptr;
+#if defined(_WIN32)
+    SDL_PropertiesID props = SDL_GetWindowProperties(sdl_window);
+    return static_cast<HWND>(SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+#else
+    return sdl_window;
+#endif
+}
+
+class DxvkWsiDriverGuard {
+public:
+    DxvkWsiDriverGuard() {
+#if !defined(_WIN32)
+        setenv("DXVK_WSI_DRIVER", "SDL3", 1);
+#endif
+    }
+}_;
+
 int main(int argc, char* argv[]) {
     (void)argc; (void)argv;
-
-#if !defined(_WIN32)
-    setenv("DXVK_WSI_DRIVER", "SDL3", 1);
-#endif
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("CRITICAL: SDL_Init(VIDEO) Failed: %s", SDL_GetError());
@@ -154,13 +169,7 @@ int main(int argc, char* argv[]) {
 
     SDL_GetWindowSizeInPixels(window, &width, &height);
 
-    HWND nativeWindowHandle;
-#if defined(_WIN32)
-    SDL_PropertiesID props = SDL_GetWindowProperties(window);
-    nativeWindowHandle = (HWND)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
-#else
-    nativeWindowHandle = (HWND)window;
-#endif
+    HWND nativeWindowHandle = GetNativeWindowHandle(window);
 
     if (!nativeWindowHandle) {
         SDL_Log("CRITICAL: Native Window Handle is NULL!");
