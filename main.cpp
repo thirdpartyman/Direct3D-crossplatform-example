@@ -145,6 +145,14 @@ public:
     }
 } dxvkGuard;
 
+bool IsRunningOnDXVK() {
+#if defined(SDL_PLATFORM_WINDOWS)
+    HMODULE hVulkan = GetModuleHandleA("vulkan-1.dll");
+    return (hVulkan != nullptr);
+#endif
+    return true;
+}
+
 int main(int argc, char* argv[]) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("CRITICAL: SDL_Init(VIDEO) Failed: %s", SDL_GetError());
@@ -195,6 +203,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     SDL_Log("STATUS: Direct3D9 Interface created.");
+    
+    if (IsRunningOnDXVK()) {
+        SDL_Log("STATUS: Runtime backend detected as DXVK (Vulkan).");
+    } else {
+        SDL_Log("STATUS: Runtime backend detected as Native Microsoft D3D9.");
+    }    
 
     HRESULT hr = d3d->CreateDevice(
         D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, nativeWindowHandle,
