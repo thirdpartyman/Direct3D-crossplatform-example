@@ -221,18 +221,11 @@ int main(int argc, char* argv[]) {
 
     SDL_AddEventWatch(WindowResizeWatcher, nullptr);
 
-    bool running = true;
-    while (running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
-            else if (event.type == SDL_EVENT_KEY_DOWN) {
-                if (event.key.key == SDLK_ESCAPE) {
-                    running = false;
-                }
-            }
+    SDL_Event event;
+    while (SDL_WaitEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT || 
+           (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)) {
+            break;
         }
         RenderFrame();
     }
