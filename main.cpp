@@ -110,14 +110,22 @@ bool SDLCALL WindowResizeWatcher(void* userdata, SDL_Event* event) {
     return true;
 }
 
-void ShutdownApp() {
-    SDL_RemoveEventWatch(WindowResizeWatcher, nullptr);
-    DestroyTriangle();
-    if (device) { device->Release(); device = nullptr; }
-    if (d3d) { d3d->Release(); d3d = nullptr; }
-    if (window) { SDL_DestroyWindow(window); window = nullptr; }
-    SDL_Quit();
-}
+class ApplicationGuard {
+public:
+    ApplicationGuard() = default;
+
+    ~ApplicationGuard() {
+        SDL_RemoveEventWatch(WindowResizeWatcher, nullptr);
+        DestroyTriangle();
+        if (device) { device->Release(); device = nullptr; }
+        if (d3d) { d3d->Release(); d3d = nullptr; }
+        if (window) { SDL_DestroyWindow(window); window = nullptr; }
+        SDL_Quit();
+    }
+
+    ApplicationGuard(const ApplicationGuard&) = delete;
+    ApplicationGuard& operator=(const ApplicationGuard&) = delete;
+} appGuard;
 
 HWND GetNativeWindowHandle(SDL_Window* sdl_window) {
     if (!sdl_window) return nullptr;
@@ -162,7 +170,6 @@ int main(int argc, char* argv[]) {
     
     if (!window) {
         SDL_Log("CRITICAL: SDL_CreateWindow Failed: %s", SDL_GetError());
-        SDL_Quit();
         return -1;
     }
     SDL_Log("STATUS: Window created successfully.");
@@ -173,7 +180,6 @@ int main(int argc, char* argv[]) {
 
     if (!nativeWindowHandle) {
         SDL_Log("CRITICAL: Native Window Handle is NULL!");
-        ShutdownApp();
         return -1;
     }
     SDL_Log("STATUS: Native window handle retrieved.");
@@ -189,7 +195,6 @@ int main(int argc, char* argv[]) {
     d3d = Direct3DCreate9(D3D_SDK_VERSION);
     if (!d3d) {
         SDL_Log("CRITICAL: Direct3DCreate9 returned NULL! (d3d9.dll missing or broken in Wine)");
-        ShutdownApp();
         return -1;
     }
     SDL_Log("STATUS: Direct3D9 Interface created.");
@@ -200,7 +205,6 @@ int main(int argc, char* argv[]) {
         );
     if (FAILED(hr)) {
         SDL_Log("CRITICAL: CreateDevice Failed. HRESULT: 0x%X", (unsigned int)hr);
-        ShutdownApp();
         return -1;
     }
     SDL_Log("STATUS: D3D9 Device created successfully.");
@@ -212,7 +216,6 @@ int main(int argc, char* argv[]) {
 
     if (!CreateTriangle()) {
         SDL_Log("CRITICAL: CreateTriangle geometry initialization failed!");
-        ShutdownApp();
         return -1;
     }
     SDL_Log("STATUS: Geometry buffer created. Entering main loop...");
@@ -237,7 +240,6 @@ int main(int argc, char* argv[]) {
         RenderFrame();
     }
 
-    ShutdownApp();
     SDL_Log("STATUS: Application closed cleanly.");
     return 0;
 }
