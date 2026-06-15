@@ -132,7 +132,19 @@ int main(int argc, char* argv[]) {
     }
     SDL_Log("STATUS: SDL_Init successful.");
 
-    window = SDL_CreateWindow("SDL3 d3d9/dxvk example", width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+    SDL_PropertiesID win_props = SDL_CreateProperties();
+    SDL_SetStringProperty(win_props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "SDL3 d3d9/dxvk example");
+    SDL_SetNumberProperty(win_props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+    SDL_SetNumberProperty(win_props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+    SDL_SetBooleanProperty(win_props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
+
+#if !defined(SDL_PLATFORM_WINDOWS)
+    SDL_SetBooleanProperty(win_props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, true);
+#endif
+
+    window = SDL_CreateWindowWithProperties(win_props);
+    SDL_DestroyProperties(win_props);
+    
     if (!window) {
         SDL_Log("CRITICAL: SDL_CreateWindow Failed: %s", SDL_GetError());
         SDL_Quit();
