@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 
     d3d = Direct3DCreate9(D3D_SDK_VERSION);
     if (!d3d) {
-	SDL_Log("CRITICAL: Direct3DCreate9 returned NULL! (d3d9.dll missing or broken in Wine)");
+	SDL_Log("CRITICAL: Direct3DCreate9 returned NULL!");
         return -1;
     }
     SDL_Log("STATUS: Direct3D9 Interface created.");
@@ -230,8 +230,6 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     SDL_Log("STATUS: Geometry buffer created. Entering main loop...");
-
-    RenderFrame();
 
     SDL_AddEventWatch(WindowResizeWatcher, nullptr);
 
