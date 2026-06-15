@@ -1,7 +1,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <d3d9.h>
-#include <cstdlib>
 
 struct Vertex {
     float x, y, z;
@@ -140,15 +139,13 @@ HWND GetNativeWindowHandle(SDL_Window* sdl_window) {
 class DxvkWsiDriverGuard {
 public:
     DxvkWsiDriverGuard() {
-#if !defined(_WIN32)
-        setenv("DXVK_WSI_DRIVER", "SDL3", 1);
+#if !defined(SDL_PLATFORM_WINDOWS)
+		SDL_SetEnvironmentVariable(SDL_GetEnvironment(), "DXVK_WSI_DRIVER", "SDL3", true);
 #endif
     }
-}_;
+} dxvkGuard;
 
 int main(int argc, char* argv[]) {
-    (void)argc; (void)argv;
-
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("CRITICAL: SDL_Init(VIDEO) Failed: %s", SDL_GetError());
         return -1;
@@ -194,7 +191,7 @@ int main(int argc, char* argv[]) {
 
     d3d = Direct3DCreate9(D3D_SDK_VERSION);
     if (!d3d) {
-        SDL_Log("CRITICAL: Direct3DCreate9 returned NULL! (d3d9.dll missing or broken in Wine)");
+	SDL_Log("CRITICAL: Direct3DCreate9 returned NULL! (d3d9.dll missing or broken in Wine)");
         return -1;
     }
     SDL_Log("STATUS: Direct3D9 Interface created.");
