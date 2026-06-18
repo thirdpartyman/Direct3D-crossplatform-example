@@ -57,7 +57,7 @@ else()
 endif()
 
 if(WIN32)
-    set(GRAPHICS_LIBRARIES "d3d9")
+    set(GRAPHICS_LIBRARIES "d3d9" "d3dcompiler")
     set(GRAPHICS_INCLUDE_DIRS "")
 else()
     find_path(DXVK_INCLUDE_DIR NAMES d3d9.h PATH_SUFFIXES dxvk)
