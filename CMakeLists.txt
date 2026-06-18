@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(SDL3_D3D9_DXVK_Example C CXX)
+project(SDL3_D3D9_DXVK_Example CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -70,7 +70,7 @@ endif()
 
 set(PROJECT_SOURCES main.cpp)
 if(NOT WIN32)
-    list(APPEND PROJECT_SOURCES shader_compiler.c)
+    list(APPEND PROJECT_SOURCES shader_compiler.cpp)
 endif()
 
 add_executable(sdl3_d3d9_dxvk_example ${PROJECT_SOURCES})
