@@ -3,6 +3,7 @@
 #include <d3d9.h>
 #include <d3dcompiler.h>
 
+
 struct Vertex {
     float x, y, z;
     uint32_t color;
@@ -192,14 +193,15 @@ HWND GetNativeWindowHandle(SDL_Window* sdl_window) {
 #endif
 }
 
+#if !defined(SDL_PLATFORM_WINDOWS)
+#include <stdlib.h>
 class DxvkWsiDriverGuard {
 public:
     DxvkWsiDriverGuard() {
-#if !defined(SDL_PLATFORM_WINDOWS)
-		SDL_SetEnvironmentVariable(SDL_GetEnvironment(), "DXVK_WSI_DRIVER", "SDL3", true);
-#endif
+        setenv("DXVK_WSI_DRIVER", "SDL3", 1);
     }
 } dxvkGuard;
+#endif
 
 bool IsRunningOnDXVK() {
 #if defined(SDL_PLATFORM_WINDOWS)
