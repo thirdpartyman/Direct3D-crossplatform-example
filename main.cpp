@@ -1,7 +1,11 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <d3d9.h>
+#if defined(SDL_PLATFORM_WINDOWS)
 #include <d3dcompiler.h>
+#else
+#include "shader_compiler.h"
+#endif
 
 
 struct Vertex {

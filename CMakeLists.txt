@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(SDL3_D3D9_DXVK_Example CXX)
+project(SDL3_D3D9_DXVK_Example C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,7 +68,12 @@ else()
     set(GRAPHICS_INCLUDE_DIRS ${DXVK_D3D9_INCLUDE_DIRS} ${VKD3D_UTILS_INCLUDE_DIRS})
 endif()
 
-add_executable(sdl3_d3d9_dxvk_example main.cpp)
+set(PROJECT_SOURCES main.cpp)
+if(NOT WIN32)
+    list(APPEND PROJECT_SOURCES shader_compiler.c)
+endif()
+
+add_executable(sdl3_d3d9_dxvk_example ${PROJECT_SOURCES})
 
 if(GRAPHICS_INCLUDE_DIRS)
     target_include_directories(sdl3_d3d9_dxvk_example PRIVATE ${GRAPHICS_INCLUDE_DIRS})
